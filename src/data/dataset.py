@@ -2,6 +2,7 @@
 Semantic Segmentation Dataset
 """
 import os
+import warnings
 
 import numpy as np
 import torch
@@ -114,13 +115,17 @@ def get_image_mask_pairs(images_dir: str, masks_dir: str) -> tuple:
     # Get mask files
     mask_files = [f for f in os.listdir(masks_dir) if f.lower().endswith(valid_extensions)]
 
-    # Sort by base name
-    def sorting_key(filename):
-        base_name = os.path.splitext(filename)[0]
-        return base_name.replace("_mask", "")
+    # Pair by exact name so one missing file can't shift every later pair
+    def base_name(filename):
+        return os.path.splitext(filename)[0].replace("_mask", "")
 
-    image_files.sort(key=sorting_key)
-    mask_files.sort(key=sorting_key)
+    masks_by_name = {base_name(f): f for f in mask_files}
+    image_files = sorted(image_files, key=base_name)
+    unmatched = [f for f in image_files if base_name(f) not in masks_by_name]
+    if unmatched:
+        warnings.warn(f"Skipping {len(unmatched)} images without a mask, e.g. {unmatched[0]}")
+    image_files = [f for f in image_files if base_name(f) in masks_by_name]
+    mask_files = [masks_by_name[base_name(f)] for f in image_files]
 
     # Create full paths
     image_paths = [os.path.join(images_dir, f) for f in image_files]

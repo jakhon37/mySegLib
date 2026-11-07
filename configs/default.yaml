@@ -26,7 +26,7 @@ model:
   architecture: "Unet"
   encoder: "resnet18"  # or resnet50, resnet101, efficientnet-b4, etc.
   encoder_weights: "imagenet"
-  activation: "softmax2d"
+  activation: "softmax2d"  # Inference and export only: training hands the losses logits
   num_classes: 2
   # Optimization options
   gradient_checkpointing: false  # Enable for large models (saves memory, costs some compute)

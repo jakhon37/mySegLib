@@ -307,7 +307,8 @@ def main(args):
         encoder=model_cfg["encoder"],
         encoder_weights=model_cfg["encoder_weights"],
         num_classes=model_cfg["num_classes"],
-        activation=model_cfg["activation"],
+        # The losses take logits: an activation here would apply softmax twice and floor the loss
+        activation=None,
         gradient_checkpointing=model_cfg.get("gradient_checkpointing", False),
     )
     model = model.to(device)
